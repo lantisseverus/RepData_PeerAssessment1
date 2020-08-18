@@ -7,12 +7,12 @@ output:
 
 
 ## Loading and preprocessing the data
-
+```{r}
 setwd("/Users/test//Desktop/Rcode")
 activity <- read.csv("activity.csv")
 activity$date <- as.Date(activity$date)
 head(activity)
-
+```
 
 ##   steps       date interval
 ## 1    NA 2012-10-01        0
@@ -26,14 +26,14 @@ head(activity)
 
 ### 1. Calculate the total number of steps taken per day
 
-
+```{r}
 library(dplyr)
 stepsDay <- activity %>%
     group_by(date) %>%
     summarise(sumsteps = sum(steps, na.rm = TRUE))
 #First 10 rows:
 head(stepsDay, 10)
-
+```
 
 ## # A tibble: 10 x 2
 ##    date       sumsteps
@@ -49,22 +49,23 @@ head(stepsDay, 10)
 ##  9 2012-10-09    12811
 ## 10 2012-10-10     9900
 
-### 2. If you do not understand the difference between a histogram and a barplot, research the difference between them. 
-Make a histogram of the total number of steps taken each day
+### 2. If you do not understand the difference between a histogram and a barplot, research the difference between them. Make a histogram of the total number of steps taken each day
 
+```{r}
 hist(stepsDay$sumsteps, main = "Histogram of Daily Steps", col = "green", xlab = "Steps", ylim = c(0, 30))
-
+```
 
 
 
 
 ### 3. Calculate and report the mean and median of the total number of steps taken per day
 
+```{r}
 meanstep <- mean(stepsDay$sumsteps)
 medianstep <- median(stepsDay$sumsteps)
 print(paste("The mean is: ", meanstep))
 print(paste("The median is: ", medianstep))
-
+```
 
 ## [1] "The mean is:  9354.22950819672"
 ## [1] "The median is:  10395"
@@ -73,11 +74,13 @@ print(paste("The median is: ", medianstep))
 
 ### 1. Make a time series plot (i.e.type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
+```{r}
 stepsInterval <- activity %>%
     group_by(interval) %>%
     summarise(meansteps = mean(steps, na.rm = TRUE))
 #First 10 rows:
 head(stepsInterval, 10)
+```
 
 ## # A tibble: 10 x 2
 ##    interval meansteps
@@ -93,16 +96,18 @@ head(stepsInterval, 10)
 ##  9       40    0     
 ## 10       45    1.47
 
-
+```{r}
 plot(stepsInterval$meansteps ~ stepsInterval$interval, col = "red", type = "l", 
      xlab = "5-minute interval", ylab = "Average Number of Steps", main = "Daily Mean Steps by Interval" )
-
+```
 
 ### 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
+```{r}
 print(paste("Interval containing the most steps on average: ",stepsInterval$interval[which.max(stepsInterval$meansteps)]))
 
 print(paste("Average steps for that interval: ",max(stepsInterval$meansteps)))
+```
 
 ## [1] "Interval containing the most steps on average:  835"
 
@@ -114,8 +119,9 @@ print(paste("Average steps for that interval: ",max(stepsInterval$meansteps)))
 Note that there are a number of days/intervals where there are missing values (coded as *NA*). The presence of missing days may introduce bias into some calculations or summaries of the data.
 ### 1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
+```{r}
 print(paste("The total number of rows with NA is: ",sum(is.na(activity$steps))))
-
+```
 
 ## [1] "The total number of rows with NA is:  2304"
 
@@ -123,12 +129,13 @@ print(paste("The total number of rows with NA is: ",sum(is.na(activity$steps))))
 
 ### 3.Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
+```{r}
 replacewithmean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
 meandata <- activity%>% 
     group_by(interval) %>% 
     mutate(steps= replacewithmean(steps))
 head(meandata)
-
+```
 
 ## # A tibble: 6 x 3
 ## # Groups:   interval [6]
@@ -143,11 +150,12 @@ head(meandata)
 
 ### 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
+```{r}
 stepsDay <- meandata %>%
     group_by(date) %>%
     summarise(sumsteps = sum(steps, na.rm = TRUE))
 head(stepsDay , 10)
-
+```
 ## # A tibble: 10 x 2
 ##    date       sumsteps
 ##    <date>        <dbl>
@@ -163,25 +171,25 @@ head(stepsDay , 10)
 ## 10 2012-10-10    9900
 
 
-
+```{r}
 hist(stepsDay$sumsteps, main = "Histogram of Daily Steps", 
      col="green", xlab="Steps")
-
-
+```
+```{r}
 meanstep2 <- mean(stepsDay$sumsteps)
 medianstep2 <- median(stepsDay$sumsteps)
 print(paste("The mean is: ", meanstep2))
 print(paste("The median is: ", medianstep2))
-
+```
 ## [1] "The mean is:  10766.1886792453"
 ## [1] "The median is:  10766.1886792453"
 
 ## Comparison:
-
+```{r}
 comparison <- data.frame(mean = c(meanstep, meanstep2), median = c(medianstep, medianstep2))
 rownames(comparison) <- c("Pre NA Transformation", "Post NA Transformation")
 print(comparison)
-
+```
 ##                            mean   median
 ## Pre NA Transformation   9354.23 10395.00
 ## Post NA Transformation 10766.19 10766.19
@@ -192,13 +200,16 @@ print(comparison)
 
 ### 1. Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
 
+```{r}
 activityDoW <- meandata
 activityDoW$date <- as.Date(activityDoW$date)
 activityDoW$day <- ifelse(weekdays(activityDoW$date) %in% c("Saturday", "Sunday"), "weekend", "weekday")
 activityDoW$day <- as.factor(activityDoW$day)
+```
 
 ### 2. Make a panel plot containing a time series plot (i.e.type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
 
+```{r}
 meandata$date <- as.Date(meandata$date)
 meandata$weekday <- weekdays(meandata$date)
 meandata$weekend <- ifelse(meandata$weekday=="Saturday" | meandata$weekday=="Sunday", "Weekend", "Weekday" )
@@ -210,5 +221,5 @@ names(meandataweekendweekday) <- c("weekend", "interval", "steps")
 ggplot(meandataweekendweekday, aes(x=interval, y=steps, color=weekend)) + geom_line()+
 facet_grid(weekend ~.) + xlab("Interval") + ylab("Mean of Steps") +
     ggtitle("Comparison of Average Number of Steps in Each Interval")
-
+```
 
